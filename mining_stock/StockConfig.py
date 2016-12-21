@@ -1,0 +1,13 @@
+
+COMPANY_LIST_FILE = './data/stock_company.csv'
+HISTORY_STOCK_WEB = 'http://jsjustweb.jihsun.com.tw/Z/ZC/ZCW/czkc1.djbcd?a=%s&b=D&c=2880&E=1&ver=5'
+STOCK_DATA_FOLDER = './data/history_stock/'
+
+DURING_NEAR_AVG = 30
+DURING_QUANTITY = 20
+QUANTITY_TRANS_AVERAGE = 200
+#QUANTITY_TRANS_PERCENT = 0.7
+NEAR_AVG_DIFF_PERCENT = 0.005
+NEAR_AVG_GRAVITY_PERCENT = 0.6
+
+HOURS_CSV_UPDATE = 6
