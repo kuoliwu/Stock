@@ -9,6 +9,7 @@ from datetime import date
 import pandas as pd
 #import numpy as nm
 import os.path
+import pyalgo_redK
 
 stockdata_manager = {}
 
@@ -19,14 +20,20 @@ class StockData:
         self.stock_pandas = None
         self.count = 0
         
-    def addItem(self, date, opening_price , highest_price, lowest_price, finial_price, quantity):
+    def addItem(self, date, opening_price , highest_price, lowest_price, finial_price, quantity,  
+                         short_buy,  short_sell,  foreign_investment,  legal_person,  self_employed):
         item = {}
         item['date'] = date
-        item['opening_price'] = opening_price
-        item['highest_price'] = highest_price
-        item['lowest_price'] = lowest_price
-        item['finial_price'] = finial_price
-        item['quantity'] = quantity
+        item['opening_price'] = float(opening_price)
+        item['highest_price'] = float(highest_price)
+        item['lowest_price'] = float(lowest_price)
+        item['finial_price'] = float(finial_price)
+        item['quantity'] = int(quantity)
+        item['short_buy'] = int(short_buy)
+        item['short_sell'] = int(short_sell)
+        item['foreign_investment'] = int(foreign_investment)
+        item['legal_person'] = int(legal_person)
+        item['self_employed'] = int(self_employed)
         self.stock_data.append(item)
         self.count+=1
 
@@ -34,6 +41,12 @@ class StockData:
         if index >= self.count:
             return None
         return self.stock_data[index]
+        
+    def getStockData(self):
+        return self.stock_data
+        
+    def getStockPandas(self):
+        return self.stock_pandas
         
     def getItemCount(self):
         return self.count
@@ -202,7 +215,13 @@ def accessHistoryStockWithWeb(stock_id):
             lowest_price= res[j+count_size*3]
             finial_price= res[j+count_size*4]
             quantity= res[j+count_size*5]
-            stock_data.addItem(date,opening_price, highest_price,lowest_price, finial_price, quantity)
+            short_buy= res[j+count_size*6]
+            short_sell= res[j+count_size*7]
+            foreign_investment= res[j+count_size*8]
+            legal_person= res[j+count_size*9]
+            self_employed= res[j+count_size*10]
+            stock_data.addItem(date,opening_price, highest_price,lowest_price, finial_price, quantity, 
+                                         short_buy,  short_sell,  foreign_investment,  legal_person,  self_employed)
          stock_data.calculateAvg()
          stock_data.listPandas()
          stock_data.writeCSV()
@@ -252,10 +271,6 @@ def caculateStockNearAvg(stock_id,  date,  during):
 def checkQuantity(quan):
     if (quan == None):
         return 0
-        
-    #if quan[0]['quan_diff_percent'] >= System.QUANTITY_TRANS_PERCENT:
-     #   return 0
-
     sum_quan = 0
     avg_quan = 0
     for i in range(len(quan)):
@@ -279,9 +294,16 @@ def calculateStockQuantity(stock_id,  date,  during):
     return checkQuantity(stockdata_manager[stock_id].calculateQuantity(start,  end))
     
 def caculateStockChoice(stock_id,  date):
-    if (caculateStockNearAvg(stock_id, date,  System.DURING_NEAR_AVG) == 0):
+    if validate(date) == False:
         return 0
-    if (calculateStockQuantity(stock_id, date,  System.DURING_QUANTITY) == 0):
+    if stock_id  not in stockdata_manager:
+        return 0
+    #if (caculateStockNearAvg(stock_id, date,  System.DURING_NEAR_AVG) == 0):
+    #    return 0
+    #if (calculateStockQuantity(stock_id, date,  System.DURING_QUANTITY) == 0):
+     #   return 0
+    if pyalgo_redK.caculate_redK_mointor(stock_id,  stockdata_manager[stock_id].getStockData(),  
+                   stockdata_manager[stock_id].getStockPandas(),  date) ==0:
         return 0
     return 1
     
@@ -295,7 +317,10 @@ if __name__ == "__main__":
     initBroseWeb()
     choice_stock = {}
     cur_date = date.today().strftime('%Y/%m/%d')
+    i = 0
     for  stock_id in stockdata_manager:
+        print (str(i) + "##" + str(len(stockdata_manager)))
+        i+=1
         ret = caculateStockChoice(stock_id, cur_date)
         if ret == 1:
             choice_stock[stock_id] = stockdata_manager[stock_id]
