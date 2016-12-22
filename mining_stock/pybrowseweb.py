@@ -9,6 +9,7 @@ from datetime import date
 import pandas as pd
 #import numpy as nm
 import os.path
+import progressbar
 
 stockdata_manager = {}
 
@@ -219,8 +220,9 @@ def accessHistoryStockWithCsv(stock_id):
 def accessAllHistoryStock():
     company = getCompanyList()
     flag_update = checkCsvUpdate()
-    for i in range(len(company)):
-        print (str(i) + "/" + str(len(company)))
+    bar = progressbar.ProgressBar()
+    for i in bar(range(len(company))):
+    #    print (str(i) + "/" + str(len(company)))
         stock_id = company[i]['Number']
         if (flag_update == 1):
             stock = accessHistoryStockWithWeb(stock_id)

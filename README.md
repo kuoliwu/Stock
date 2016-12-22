@@ -26,5 +26,5 @@ python mail.py
 
 ================
 
-pip install progressbar
+pip install progressbar2
 
